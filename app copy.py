@@ -9,19 +9,19 @@ import seaborn as sns
 import re
 import itertools
 
-# ==== CONFIGURABLE (tinggal ganti kalau Excel berubah header) ====
-MONEY_COLS = ["Total Spent", "Avg Order Value"]
-
 # ============== Helper: Clustering ==============
 def run_clustering(df: pd.DataFrame, n_clusters: int):
     numeric_cols = df.select_dtypes(include=["int64", "float64"]).columns.tolist()
     if len(numeric_cols) == 0:
         raise ValueError("Tidak ada kolom numerik yang dapat digunakan untuk clustering.")
+
     features = df[numeric_cols].copy()
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(features)
+
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     labels = kmeans.fit_predict(X_scaled)
+
     df_clustered = df.copy()
     df_clustered["Cluster"] = labels + 1
     return df_clustered, kmeans, X_scaled, numeric_cols
@@ -31,6 +31,7 @@ def run_elbow(df: pd.DataFrame, max_k: int = 10):
     features = df[numeric_cols].copy()
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(features)
+
     sse = []
     for k in range(1, max_k + 1):
         kmeans = KMeans(n_clusters=k, random_state=42)
@@ -38,6 +39,7 @@ def run_elbow(df: pd.DataFrame, max_k: int = 10):
         sse.append(kmeans.inertia_)
     return sse
 
+# ============== Helper: Statistik Pelanggan ==============
 def compute_cluster_stats(df_clustered: pd.DataFrame, numeric_cols):
     df = df_clustered.copy()
     cluster_mean = (
@@ -55,6 +57,7 @@ def compute_cluster_stats(df_clustered: pd.DataFrame, numeric_cols):
     )
     return df, cluster_mean, cluster_size
 
+# ============== Helper: Export Excel ==============
 def make_excel_report(df_clustered: pd.DataFrame):
     output = BytesIO()
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
@@ -62,39 +65,23 @@ def make_excel_report(df_clustered: pd.DataFrame):
     output.seek(0)
     return output.getvalue()
 
+
 def format_rupiah(x):
     try:
         x = float(x)
         return "Rp {:,.0f}".format(x).replace(",", ".")
     except:
         return x 
-
-def show_df_with_rupiah(df, money_cols=MONEY_COLS, **kwargs):
-    df_show = df.copy()
-    for col in money_cols:
-        if col in df_show.columns:
-            df_show[col] = df_show[col].apply(format_rupiah)
-    st.dataframe(df_show, **kwargs)
-
-def show_table_with_rupiah(df, money_cols=MONEY_COLS):
-    df_show = df.copy()
-    for col in money_cols:
-        if col in df_show.columns:
-            df_show[col] = df_show[col].apply(format_rupiah)
-    st.table(df_show)
-
-def parse_rupiah(x):
-    if isinstance(x, str):
-        return float(re.sub(r"[^\d]", "", x))
-    return x
-
+    
+    
 # ============== Main App ==============
 def main():
     st.set_page_config(page_title="Customer Clustering - Toko Salma Company", layout="wide")
-    st.title("🧮Salma Company")
+    st.title("🧮 Customer Segmentation — Toko Salma Company")
 
+    # ------------- INISIALISASI SESSION STATE CLUSTER -------------
     if "n_clusters" not in st.session_state:
-        st.session_state["n_clusters"] = 3
+        st.session_state["n_clusters"] = 3  # default
 
     tabs = st.tabs([
         "📊 Dashboard", 
@@ -103,9 +90,10 @@ def main():
         "📄 Laporan"
     ])
 
-    # =========== TAB 1: DASHBOARD ===========
+    # =================== TAB 1: DASHBOARD ===================
     with tabs[0]:
         st.header("📊 Dashboard Business Intelligence — Analisis Pelanggan")
+
         st.write("""
 Aplikasi ini digunakan untuk menganalisis **data pelanggan** menggunakan algoritma 
 **K-Means Clustering** untuk membantu **Toko Salma Company** memahami perilaku pelanggan 
@@ -131,20 +119,28 @@ meningkatkan layanan, serta mengoptimalkan strategi pemasaran dan stok produk.
 
             st.subheader("2️⃣ Statistik Fitur per Cluster")
             cluster_mean = df_dashboard.groupby("Cluster")[numeric_cols].mean().round(2)
-            show_table_with_rupiah(cluster_mean)
-
-            # Produk Favorit Global & Per Cluster
+            for col in ["Total Spent", "Avg Order Value"]:
+                if col in cluster_mean.columns:
+                   cluster_mean[col] = cluster_mean[col].apply(format_rupiah)
+            st.dataframe(cluster_mean)
+            
             if "Produk Favorit" in df_dashboard.columns:
                 st.subheader("🏆 Top 5 Produk Favorit Seluruh Pelanggan")
-                tp = df_dashboard["Produk Favorit"].value_counts().head(5).reset_index()
-                tp.columns = ["Produk", "Jumlah Pembelian"]
-                st.table(tp)
+                top_product = df_dashboard["Produk Favorit"].value_counts().head(5)
+                st.table(
+                    top_product.reset_index().rename(
+                        columns={"index": "Produk", "Produk Favorit": "Jumlah Pembelian"}
+                    )
+                )
                 st.subheader("🏆 Produk Favorit per Cluster")
                 for cluster in sorted(df_dashboard["Cluster"].unique()):
                     st.write(f"#### Cluster {cluster}")
-                    tpc = df_dashboard[df_dashboard["Cluster"] == cluster]["Produk Favorit"].value_counts().head(3).reset_index()
-                    tpc.columns = ["Produk", "Jumlah Pembelian"]
-                    st.table(tpc)
+                    top_product = df_dashboard[df_dashboard["Cluster"] == cluster]["Produk Favorit"].value_counts().head(3)
+                    st.table(
+                        top_product.reset_index().rename(
+                            columns={"index": "Produk", "Produk Favorit": "Jumlah Pembelian"}
+                        )
+                    )
 
             col1, col2, col3 = st.columns(3)
             col1.metric("Total Pelanggan", len(df_dashboard))
@@ -164,9 +160,10 @@ meningkatkan layanan, serta mengoptimalkan strategi pemasaran dan stok produk.
         else:
             st.info("Belum ada data clustering. Silakan jalankan proses di tab **Proses Clustering** terlebih dahulu.")
 
-    # =========== TAB 2: PROSES CLUSTERING ===========
+    # =================== TAB 2: PROSES CLUSTERING ===================
     with tabs[1]:
         st.header("🧪 Proses Clustering Data Pelanggan")
+
         uploaded_file = st.file_uploader("Unggah file Excel / CSV data pelanggan", type=["xlsx", "csv"])
         if uploaded_file is not None:
             filename = uploaded_file.name.lower()
@@ -180,7 +177,12 @@ meningkatkan layanan, serta mengoptimalkan strategi pemasaran dan stok produk.
             st.write(f"Jumlah baris: **{len(df)}**")
             st.dataframe(df, use_container_width=True)
 
-            for col in MONEY_COLS:
+            # --- Ubah kolom Rp ke numerik ---
+            def parse_rupiah(x):
+                if isinstance(x, str):
+                    return float(re.sub(r"[^\d]", "", x))
+                return x
+            for col in ["Total Spent", "Avg Order Value"]:
                 if col in df.columns:
                     df[col] = df[col].apply(parse_rupiah)
 
@@ -206,13 +208,16 @@ meningkatkan layanan, serta mengoptimalkan strategi pemasaran dan stok produk.
                 "SSE": sse
             })
             st.table(sse_table)
+
             st.write("SSE (Sum of Squared Errors) adalah ukuran untuk menilai seberapa baik model klasterisasi. Semakin kecil nilai SSE, semakin baik model memisahkan data.")
 
+            # Slider sinkron dengan session_state
             n_clusters = st.slider(
                 "Pilih jumlah cluster (k)", min_value=2, max_value=10,
                 value=st.session_state["n_clusters"], key="n_clusters"
             )
 
+            # Jalankan clustering HANYA JIKA data/slider berubah
             if "last_uploaded" not in st.session_state or st.session_state["last_uploaded"] != filename \
                 or st.session_state.get("last_n_clusters", None) != n_clusters \
                 or "df_clustered" not in st.session_state:
@@ -231,7 +236,7 @@ meningkatkan layanan, serta mengoptimalkan strategi pemasaran dan stok produk.
                 used_numeric_cols = st.session_state["numeric_cols"]
                 X_scaled = st.session_state["X_scaled"]
 
-            # Visualisasi: scatterplot semua kombinasi fitur
+            # Visualisasi: semua kombinasi scatterplot 2D
             st.subheader("📊 Visualisasi Cluster pada Berbagai Fitur")
             combis = list(itertools.combinations(used_numeric_cols, 2))
             if len(combis) == 0:
@@ -257,12 +262,19 @@ meningkatkan layanan, serta mengoptimalkan strategi pemasaran dan stok produk.
             st.write(f"📉 **Davies-Bouldin Index (DBI):** `{dbi:.3f}` — Semakin kecil semakin baik.")
             st.write("Nilai DBI yang lebih rendah menunjukkan hasil clustering yang lebih baik.")
            
-            # Tabel hasil clustering per cluster (format rupiah)
+            # st.write("### Tabel Hasil Clustering per Cluster:")
+            # for cluster in sorted(df_clustered['Cluster'].unique()):
+            #     st.write(f"#### Cluster {cluster}")
+            #     st.dataframe(df_clustered[df_clustered['Cluster'] == cluster], use_container_width=True)
+            
             st.write("### Tabel Hasil Clustering per Cluster:")
             for cluster in sorted(df_clustered['Cluster'].unique()):
                 st.write(f"#### Cluster {cluster}")
-                df_sub = df_clustered[df_clustered['Cluster'] == cluster]
-                show_df_with_rupiah(df_sub, use_container_width=True)
+                df_sub = df_clustered[df_clustered['Cluster'] == cluster].copy()  # copy agar tidak warning
+                for col in ["Total Spent", "Avg Order Value"]:
+                    if col in df_sub.columns:
+                        df_sub[col] = df_sub[col].apply(format_rupiah)
+                st.dataframe(df_sub, use_container_width=True)
 
             st.markdown("### Summary Jumlah Data per Cluster")
             st.dataframe(
@@ -272,7 +284,7 @@ meningkatkan layanan, serta mengoptimalkan strategi pemasaran dan stok produk.
         else:
             st.info("Unggah file pelanggan terlebih dahulu.")
 
-    # =========== TAB 3: HASIL & ANALISIS ===========
+    # =================== TAB 3: HASIL & ANALISIS ===================
     with tabs[2]:
         st.header("📈 Hasil dan Analisis Clustering")
         if "df_clustered" not in st.session_state:
@@ -287,26 +299,65 @@ meningkatkan layanan, serta mengoptimalkan strategi pemasaran dan stok produk.
             df_with_stats, cluster_mean, cluster_size = compute_cluster_stats(df_clustered, numeric_cols)
             st.session_state["df_with_stats"] = df_with_stats
 
+            # st.subheader("📊 Data Pelanggan dengan Cluster")
+            # st.dataframe(df_with_stats, use_container_width=True)
             st.subheader("📊 Data Pelanggan dengan Cluster")
-            show_df_with_rupiah(df_with_stats, use_container_width=True)
+            df_with_stats_show = df_with_stats.copy()
+            for col in ["Total Spent", "Avg Order Value"]:
+                if col in df_with_stats_show.columns:
+                    df_with_stats_show[col] = df_with_stats_show[col].apply(format_rupiah)
+            st.dataframe(df_with_stats_show, use_container_width=True)
 
-            cluster_mean_fmt = cluster_mean.copy()
-            for col in MONEY_COLS:
-                if col in cluster_mean_fmt.columns:
-                    cluster_mean_fmt[col] = cluster_mean_fmt[col].apply(format_rupiah)
-            st.subheader("📋 Statistik Tiap Cluster (Rata-rata Fitur)")
-            st.table(cluster_mean_fmt)
+            # st.subheader("📋 Statistik Tiap Cluster (Rata-rata Fitur)")
+            # st.table(cluster_mean)
+            
+            # st.subheader("🗂️ Tabel Hasil Clustering per Cluster")
+            # for cluster in sorted(df_clustered['Cluster'].unique()):
+            #     st.write(f"#### Cluster {cluster}")
+            #     st.dataframe(
+            #         df_clustered[df_clustered['Cluster'] == cluster], 
+            #         use_container_width=True
+            #     )
+            # st.subheader("🗂️ Tabel Hasil Clustering per Cluster")
+            # for cluster in sorted(df_clustered['Cluster'].unique()):
+            #     st.write(f"#### Cluster {cluster}")
+            #     df_sub = df_clustered[df_clustered['Cluster'] == cluster].copy()
+            #     for col in ["Total Spent", "Avg Order Value"]:
+            #         if col in df_sub.columns:
+            #             df_sub[col] = df_sub[col].apply(format_rupiah)
+            #     st.dataframe(df_sub, use_container_width=True)
+
+            # for col in ["Total Spent", "Avg Order Value"]:
+            #     if col in cluster_mean.columns:
+            #         cluster_mean[col] = cluster_mean[col].apply(format_rupiah)
+            # st.table(cluster_mean)
+
+            # st.subheader("👥 Jumlah Pelanggan per Cluster")
+            # st.table(cluster_size)
             
             st.subheader("🗂️ Tabel Hasil Clustering per Cluster")
             for cluster in sorted(df_clustered['Cluster'].unique()):
                 st.write(f"#### Cluster {cluster}")
-                df_sub = df_clustered[df_clustered['Cluster'] == cluster]
-                show_df_with_rupiah(df_sub, use_container_width=True)
+                df_sub = df_clustered[df_clustered['Cluster'] == cluster].copy()
+                for col in ["Total Spent", "Avg Order Value"]:
+                    if col in df_sub.columns:
+                        df_sub[col] = df_sub[col].apply(format_rupiah)
+                st.dataframe(df_sub, use_container_width=True)
+
+            # BIKIN SALINAN cluster_mean SUPAYA TIDAK MERUSAK DATA ASLI
+            cluster_mean_fmt = cluster_mean.copy()
+            for col in ["Total Spent", "Avg Order Value"]:
+                if col in cluster_mean_fmt.columns:
+                    cluster_mean_fmt[col] = cluster_mean_fmt[col].apply(format_rupiah)
+
+            st.subheader("📋 Statistik Tiap Cluster (Rata-rata Fitur)")
+            st.table(cluster_mean_fmt)
 
             st.subheader("👥 Jumlah Pelanggan per Cluster")
             st.table(cluster_size)
 
-    # =========== TAB 4: LAPORAN ===========
+
+    # =================== TAB 4: LAPORAN ===================
     with tabs[3]:
         st.header("📄 Unduh Laporan Hasil Clustering")
         if "df_with_stats" not in st.session_state:
