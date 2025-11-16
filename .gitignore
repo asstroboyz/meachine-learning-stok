@@ -1,0 +1,53 @@
+# -------------------------------
+# IGNORE ENVIRONMENT
+# -------------------------------
+venv/
+.env
+*.env
+
+# -------------------------------
+# IGNORE PYTHON TEMP FILES
+# -------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# -------------------------------
+# IGNORE BACKUP & COPY FILES
+# -------------------------------
+*copy*.py
+backup*.py
+*backup*.py
+
+# -------------------------------
+# IGNORE ARCHIVES
+# -------------------------------
+*.rar
+*.zip
+*.7z
+*.tar
+*.gz
+
+# -------------------------------
+# IGNORE DATASETS
+# -------------------------------
+*.xlsx
+*.csv
+*.xls
+
+# -------------------------------
+# IGNORE EVERYTHING EXCEPT (whitelist)
+# -------------------------------
+# Hanya upload 3 file ini:
+!app.py
+!requirements.txt
+!turtorial.txt
+
+# Ignore all python files except app.py
+*.py
+!app.py
+
+# Ignore readme except if we add it
+!README.md
