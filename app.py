@@ -330,16 +330,18 @@ def main():
         """, height=420)
 
 
+        #####################################
+        # st.subheader("1️⃣ Distribusi Produk per Cluster")
+        # cluster_count = df_dashboard["Cluster"].value_counts().sort_index()
 
-        st.subheader("1️⃣ Distribusi Produk per Cluster")
-        cluster_count = df_dashboard["Cluster"].value_counts().sort_index()
-
-        fig1, ax1 = plt.subplots(figsize=(7, 4))
-        sns.barplot(x=cluster_count.index, y=cluster_count.values, palette="viridis", ax=ax1)
-        ax1.set_xlabel("Cluster")
-        ax1.set_ylabel("Jumlah Produk")
-        ax1.set_title("Distribusi Jumlah Produk per Cluster")
-        st.pyplot(fig1)
+        # fig1, ax1 = plt.subplots(figsize=(7, 4))
+        # sns.barplot(x=cluster_count.index, y=cluster_count.values, palette="viridis", ax=ax1)
+        # ax1.set_xlabel("Cluster")
+        # ax1.set_ylabel("Jumlah Produk")
+        # ax1.set_title("Distribusi Jumlah Produk per Cluster")
+        # st.pyplot(fig1)
+        #####################################
+        
         
         # st.subheader("2️⃣ Rata-Rata Penjualan & Pendapatan per Cluster")
         # cluster_mean = df_dashboard.groupby("Cluster")[["Total Pendapatan (Rp)", "Jumlah Terjual"]].mean().round(2)
@@ -351,96 +353,226 @@ def main():
         # ax2.set_ylabel("Nilai")
         # st.pyplot(fig2)
         
-        st.subheader("2️⃣ Rata-Rata Pendapatan & Jumlah Terjual per Cluster")
-
-        cluster_mean = df_dashboard.groupby("Cluster")[["Total Pendapatan (Rp)", "Jumlah Terjual"]].mean().round(2)
-
-        fig, ax1 = plt.subplots(figsize=(10, 5))
-
-        ax2 = ax1.twinx()
-
-        # Pendapatan
-        b1 = ax1.bar(
-            cluster_mean.index - 0.2,
-            cluster_mean["Total Pendapatan (Rp)"],
-            width=0.4,
-            color="#3b82f6",
-            label="Total Pendapatan (Rp)"
-        )
-
-        # Jumlah Terjual
-        b2 = ax2.bar(
-            cluster_mean.index + 0.2,
-            cluster_mean["Jumlah Terjual"],
-            width=0.4,
-            color="#10b981",
-            label="Jumlah Terjual"
-        )
-
-        # Format Rupiah
-        import matplotlib.ticker as ticker
-        ax1.yaxis.set_major_formatter(
-            ticker.FuncFormatter(lambda x, pos: f"Rp {x:,.0f}".replace(",", "."))
-        )
-
-        # Biar tidak mepet
-        ax1.set_ylim(0, cluster_mean["Total Pendapatan (Rp)"].max() * 1.25)
-        ax2.set_ylim(0, cluster_mean["Jumlah Terjual"].max() * 1.25)
-
-        # Label
-        ax1.set_ylabel("Pendapatan (Rp)", color="#3b82f6")
-        ax2.set_ylabel("Jumlah Terjual", color="#10b981")
-        ax1.set_xlabel("Cluster")
-
-        ax1.set_title("Rata-Rata Pendapatan & Jumlah Terjual per Cluster")
-
-        # Grid kiri
-        ax1.grid(axis="y", linestyle="--", alpha=0.3)
-
-        # Ticks
-        ax1.set_xticks(cluster_mean.index)
-
-        # Gabungkan legend
-        fig.legend(loc="upper right", bbox_to_anchor=(0.92, 0.92))
-
-        st.pyplot(fig)
-
+        #####################################
+        # st.subheader("2️⃣ Rata-Rata Pendapatan & Jumlah Terjual per Cluster")
+        # cluster_mean = df_dashboard.groupby("Cluster")[["Total Pendapatan (Rp)", "Jumlah Terjual"]].mean().round(2)
+        # fig, ax1 = plt.subplots(figsize=(10, 5))
+        # ax2 = ax1.twinx()
+        # # Pendapatan
+        # b1 = ax1.bar(
+        #     cluster_mean.index - 0.2,
+        #     cluster_mean["Total Pendapatan (Rp)"],
+        #     width=0.4,
+        #     color="#3b82f6",
+        #     label="Total Pendapatan (Rp)"
+        # )
+        # # Jumlah Terjual
+        # b2 = ax2.bar(
+        #     cluster_mean.index + 0.2,
+        #     cluster_mean["Jumlah Terjual"],
+        #     width=0.4,
+        #     color="#10b981",
+        #     label="Jumlah Terjual"
+        # )
+        # # Format Rupiah
+        # import matplotlib.ticker as ticker
+        # ax1.yaxis.set_major_formatter(
+        #     ticker.FuncFormatter(lambda x, pos: f"Rp {x:,.0f}".replace(",", "."))
+        # )
+        # ax1.set_ylim(0, cluster_mean["Total Pendapatan (Rp)"].max() * 1.25)
+        # ax2.set_ylim(0, cluster_mean["Jumlah Terjual"].max() * 1.25)
+        # ax1.set_ylabel("Pendapatan (Rp)", color="#3b82f6")
+        # ax2.set_ylabel("Jumlah Terjual", color="#10b981")
+        # ax1.set_xlabel("Cluster")
+        # ax1.set_title("Rata-Rata Pendapatan & Jumlah Terjual per Cluster")
+        # ax1.grid(axis="y", linestyle="--", alpha=0.3)
+        # ax1.set_xticks(cluster_mean.index)
+        # fig.legend(loc="upper right", bbox_to_anchor=(0.92, 0.92))
+        # st.pyplot(fig)
+#####################################
 
         
         
-        
-        st.subheader("3️⃣ Produk Favorit per Cluster (Penjualan Terbanyak)")
+        #####################################
+        # st.subheader("3️⃣ Produk Favorit per Cluster (Penjualan Terbanyak)")
+        # if "Jumlah Terjual" in df_dashboard.columns and "Nama_Produk" in df_dashboard.columns:
+        #     for cluster in sorted(df_dashboard["Cluster"].unique()):
+        #         st.markdown(f"#### ⭐ Cluster {cluster}")
 
-        if "Jumlah Terjual" in df_dashboard.columns and "Nama_Produk" in df_dashboard.columns:
-            for cluster in sorted(df_dashboard["Cluster"].unique()):
-                st.markdown(f"#### ⭐ Cluster {cluster}")
+        #         subset = df_dashboard[df_dashboard["Cluster"] == cluster]
 
-                subset = df_dashboard[df_dashboard["Cluster"] == cluster]
+        #         # Urutkan berdasarkan Jumlah Terjual
+        #         top_products = subset.sort_values(
+        #             by="Jumlah Terjual",
+        #             ascending=False
+        #         ).head(5)
 
-                # Urutkan berdasarkan Jumlah Terjual
-                top_products = subset.sort_values(
-                    by="Jumlah Terjual",
-                    ascending=False
-                ).head(5)
+        #         if not top_products.empty:
+        #             st.table(
+        #                 top_products[[
+        #                     "Id Produk",
+        #                     "Nama_Produk",
+        #                     "Kategori",
+        #                     "Jumlah Terjual",
+        #                     "Total Pendapatan (Rp)",
+        #                     "Stok Tersisa"
+        #                 ]]
+        #             )
+        #         else:
+        #             st.info("Tidak ada data untuk cluster ini.")
+        # else:
+        #     st.warning("Kolom 'Jumlah Terjual' atau 'Nama_Produk' tidak ditemukan.")
+        #####################################    
 
-                if not top_products.empty:
-                    st.table(
-                        top_products[[
-                            "Id Produk",
-                            "Nama_Produk",
-                            "Kategori",
-                            "Jumlah Terjual",
-                            "Total Pendapatan (Rp)",
-                            "Stok Tersisa"
-                        ]]
-                    )
-                else:
-                    st.info("Tidak ada data untuk cluster ini.")
+        # ============================
+#  4️⃣ ANALISIS STOK — BI SALMA COMPANY
+# ============================
+
+        st.markdown("---")
+        st.subheader("4️⃣ Analisis Kesehatan Stok (Stock Health Analysis)")
+
+        # --- Fungsi kategori stok ---
+        def categorize_stock(row):
+            if row["Jumlah Terjual"] == 0:
+                return "Deadstock"
+            elif row["Stok Tersisa"] > row["Jumlah Terjual"] * 3:
+                return "Overstock"
+            elif row["Stok Tersisa"] <= 5:
+                return "Critical Reorder"
+            elif row["Stok Tersisa"] <= row["Jumlah Terjual"]:
+                return "Understock"
+            return "Normal"
+
+        df_dashboard["Stock_Health"] = df_dashboard.apply(categorize_stock, axis=1)
+
+        # Pie Chart Stock Health
+        stock_health_count = df_dashboard["Stock_Health"].value_counts()
+
+        fig_stock, axsh = plt.subplots(figsize=(6, 6))
+        axsh.pie(
+            stock_health_count,
+            labels=stock_health_count.index,
+            autopct='%1.1f%%',
+            startangle=90,
+        )
+        axsh.set_title("Distribusi Kesehatan Stok Produk")
+        st.pyplot(fig_stock)
+
+        st.write("### 🧾 Detail Kesehatan Stok")
+        st.dataframe(df_dashboard[["Nama_Produk", "Jumlah Terjual", "Stok Tersisa", "Stock_Health"]], width="stretch")
+
+        # ============================
+        #  5️⃣ REORDER RECOMMENDATION
+        # ============================
+
+        st.markdown("---")
+        st.subheader("5️⃣ Rekomendasi Pembelian Ulang (Reorder Recommendation)")
+
+        df_dashboard["Prediksi_Habis_Hari"] = (
+            df_dashboard["Stok Tersisa"] / df_dashboard["Jumlah Terjual"].replace(0, 0.1)
+        ).round(1)
+
+        def rekomendasi(row):
+            if row["Prediksi_Habis_Hari"] <= 7:
+                return "Beli Sekarang"
+            elif row["Prediksi_Habis_Hari"] <= 30:
+                return "Monitor"
+            return "Aman"
+
+        df_dashboard["Rekomendasi"] = df_dashboard.apply(rekomendasi, axis=1)
+
+        # Tabel yang harus dibeli segera
+        st.write("### 🔥 Produk yang Harus Dibeli Sekarang")
+        reorder_now = df_dashboard[df_dashboard["Rekomendasi"] == "Beli Sekarang"]
+
+        if not reorder_now.empty:
+            st.table(
+                reorder_now[[
+                    "Id Produk", "Nama_Produk", "Jumlah Terjual", "Stok Tersisa",
+                    "Prediksi_Habis_Hari", "Rekomendasi"
+                ]]
+            )
         else:
-            st.warning("Kolom 'Jumlah Terjual' atau 'Nama_Produk' tidak ditemukan.")
+            st.success("Tidak ada produk yang perlu dibeli segera 🎉")
+
+        # ============================
+        #  6️⃣ FAST-MOVING vs SLOW-MOVING
+        # ============================
+
+        st.markdown("---")
+        st.subheader("6️⃣ Fast-Moving vs Slow-Moving Products")
+
+        df_dashboard["Moving_Rate"] = (
+            df_dashboard["Jumlah Terjual"] / (df_dashboard["Jumlah Terjual"] + df_dashboard["Stok Tersisa"]).replace(0, 1)
+        ).round(2)
+
+        def moving_category(val):
+            if val >= 0.6:
+                return "Fast Moving"
+            elif val >= 0.3:
+                return "Medium"
+            return "Slow Moving"
+
+        df_dashboard["Moving_Category"] = df_dashboard["Moving_Rate"].apply(moving_category)
+
+        moving_count = df_dashboard["Moving_Category"].value_counts()
+
+        fig_mv, axmv = plt.subplots(figsize=(6, 4))
+        sns.barplot(x=moving_count.index, y=moving_count.values, palette="Set2", ax=axmv)
+        axmv.set_title("Distribusi Fast vs Slow Moving")
+        st.pyplot(fig_mv)
+
+        # ============================
+        # 7️⃣ Stock-to-Sales Ratio (SSR)
+        # ============================
+
+        st.markdown("---")
+        st.subheader("7️⃣ Stock to Sales Ratio (SSR)")
+
+        df_dashboard["SSR"] = (
+            df_dashboard["Stok Tersisa"] / df_dashboard["Jumlah Terjual"].replace(0, 0.1)
+        ).round(2)
+
+        st.line_chart(df_dashboard["SSR"])
+
+        st.write("### Tabel SSR")
+        st.dataframe(df_dashboard[["Nama_Produk", "Jumlah Terjual", "Stok Tersisa", "SSR"]])
+
+        # ============================
+        # 8️⃣ DEADSTOCK LIST
+        # ============================
+
+        st.markdown("---")
+        st.subheader("8️⃣ Daftar Produk Deadstock (Tidak Laku Sama Sekali)")
+
+        deadstock = df_dashboard[df_dashboard["Stock_Health"] == "Deadstock"]
+
+        if not deadstock.empty:
+            st.error("Produk Deadstock ditemukan. Pertimbangkan hentikan pembelian.")
+            st.table(
+                deadstock[["Id Produk", "Nama_Produk", "Kategori", "Stok Tersisa", "Jumlah Terjual"]]
+            )
+        else:
+            st.success("Tidak ada produk deadstock 🎉")
+
+        # ============================
+        # 9️⃣ OVERSTOCK LIST
+        # ============================
+
+        st.markdown("---")
+        st.subheader("9️⃣ Daftar Produk Overstock (Stok Berlebih)")
+
+        overstock = df_dashboard[df_dashboard["Stock_Health"] == "Overstock"]
+
+        if not overstock.empty:
+            st.warning("Produk Overstock ditemukan. Pertimbangkan diskon atau promosi.")
+            st.table(overstock[["Id Produk", "Nama_Produk", "Jumlah Terjual", "Stok Tersisa"]])
+        else:
+            st.success("Tidak ada produk overstock 🎉")
+
             
     with tabs[2]:
-        st.header("📈 Analisis Tiap Cluster")
+        st.header("📈 Analisis Tiap Cluster — Hasil Clustering")
 
         if "df_clustered" not in st.session_state:
             st.warning("Belum ada hasil clustering.")
@@ -449,41 +581,194 @@ def main():
         df_clustered = st.session_state["df_clustered"]
         numeric_cols = st.session_state["numeric_cols"]
 
-        df_with_stats, cluster_mean, cluster_size = compute_cluster_stats(df_clustered, numeric_cols)
+        st.markdown("""
+        Halaman ini menampilkan analisis lengkap setiap cluster berdasarkan hasil K-Means.
+        Analisis meliputi:
+        - Distribusi produk per cluster  
+        - Rata-rata pendapatan & jumlah terjual  
+        - Profil lengkap setiap cluster  
+        - Produk favorit per cluster  
+        """)
 
-        st.subheader("📊 Data Produk dengan Statistik")
-        show_df_with_rupiah(df_with_stats)
+        st.markdown("---")
 
-        st.subheader("📋 Rata-Rata Numerik per Cluster")
-        cluster_mean_fmt = cluster_mean.copy()
-        for col in MONEY_COLS:
-            if col in cluster_mean_fmt.columns:
-                cluster_mean_fmt[col] = cluster_mean_fmt[col].apply(format_rupiah)
-        st.table(cluster_mean_fmt)
+    # ============================================================
+    # 1️⃣ Distribusi Produk per Cluster
+    # ============================================================
 
-        st.subheader("📦 Jumlah Produk per Cluster")
-        cluster_size = cluster_size.rename(columns={"Cluster": "Cluster", "Jumlah Produk": "Total Produk"})
-        st.dataframe(cluster_size)
+        st.subheader("1️⃣ Distribusi Produk per Cluster")
 
+        cluster_count = df_clustered["Cluster"].value_counts().sort_index()
 
-        st.markdown("### 🧠 Insight per Cluster")
+        fig1, ax1 = plt.subplots(figsize=(7, 4))
+        sns.barplot(x=cluster_count.index, y=cluster_count.values, palette="viridis", ax=ax1)
+        ax1.set_xlabel("Cluster")
+        ax1.set_ylabel("Jumlah Produk")
+        ax1.set_title("Distribusi Produk per Cluster")
+        st.pyplot(fig1)
+
+        st.table(
+            cluster_count.reset_index().rename(columns={"index": "Cluster", "Cluster": "Jumlah Produk"})
+        )
+
+        st.markdown("---")
+
+    # ============================================================
+    # 2️⃣ Rata-Rata Pendapatan & Jumlah Terjual per Cluster
+    # ============================================================
+
+        st.subheader("2️⃣ Rata-Rata Pendapatan & Jumlah Terjual per Cluster")
+
+        cluster_mean = (
+            df_clustered.groupby("Cluster")[["Total Pendapatan (Rp)", "Jumlah Terjual"]]
+            .mean()
+            .round(2)
+        )
+
+        fig2, ax2 = plt.subplots(figsize=(10, 5))
+        ax3 = ax2.twinx()
+
+        ax2.bar(
+            cluster_mean.index - 0.2, cluster_mean["Total Pendapatan (Rp)"],
+            width=0.4, color="#3b82f6", label="Total Pendapatan (Rp)"
+        )
+
+        ax3.bar(
+            cluster_mean.index + 0.2, cluster_mean["Jumlah Terjual"],
+            width=0.4, color="#10b981", label="Jumlah Terjual"
+        )
+
+        import matplotlib.ticker as ticker
+        ax2.yaxis.set_major_formatter(
+            ticker.FuncFormatter(lambda x, pos: f"Rp {x:,.0f}".replace(",", "."))
+        )
+
+        ax2.set_ylabel("Pendapatan (Rp)", color="#3b82f6")
+        ax3.set_ylabel("Jumlah Terjual", color="#10b981")
+        ax2.set_xlabel("Cluster")
+        ax2.set_title("Rata-Rata Pendapatan & Terjual per Cluster")
+
+        fig2.legend(loc="upper right")
+        st.pyplot(fig2)
+
+        st.table(cluster_mean)
+
+        st.markdown("---")
+
+    # ============================================================
+    # 3️⃣ INSIGHT PER CLUSTER (UTAMA)
+    # ============================================================
+
+        st.subheader("3️⃣ Insight Lengkap Per Cluster (Profil & Statistik)")
 
         for cluster in sorted(df_clustered["Cluster"].unique()):
+            st.markdown(f"### 📦 Cluster {cluster}")
+
             subset = df_clustered[df_clustered["Cluster"] == cluster]
 
             pendapatan_mean = subset["Total Pendapatan (Rp)"].mean()
             jumlah_terjual_mean = subset["Jumlah Terjual"].mean()
             stok_mean = subset["Stok Tersisa"].mean()
 
-            st.markdown(f"#### 📦 Cluster {cluster}")
-            show_df_with_rupiah(subset)
+            # tampilkan tabel cluster lengkap
+            st.dataframe(subset, width="stretch")
 
             st.markdown(f"""
-            **Ringkasan:**
-            - Rata-rata pendapatan produk: **{format_rupiah(pendapatan_mean)}**
+            #### 🔍 Ringkasan Cluster {cluster}
+            - Rata-rata pendapatan: **{format_rupiah(pendapatan_mean)}**
             - Rata-rata jumlah terjual: **{jumlah_terjual_mean:.2f} unit**
             - Rata-rata stok tersisa: **{stok_mean:.2f} unit**
+
+            **Interpretasi:**
+            - Produk dengan pendapatan tinggi → potensi fast-moving  
+            - Produk dengan stok tinggi tapi terjual rendah → potensi overstock  
+            - Produk dengan stok rendah & terjual tinggi → berisiko habis (baik restock)  
             """)
+
+            st.markdown("---")
+
+    # ============================================================
+    # 4️⃣ Produk Favorit per Cluster (Top 5)
+    # ============================================================
+
+        st.subheader("4️⃣ Produk Favorit per Cluster (Top 5 Berdasarkan Penjualan)")
+
+        if "Jumlah Terjual" in df_clustered.columns and "Nama_Produk" in df_clustered.columns:
+            for cluster in sorted(df_clustered["Cluster"].unique()):
+                st.markdown(f"### ⭐ Cluster {cluster}")
+
+                subset = df_clustered[df_clustered["Cluster"] == cluster]
+                top_products = subset.sort_values(
+                    by="Jumlah Terjual",
+                    ascending=False
+                ).head(5)
+
+                if not top_products.empty:
+                    st.table(
+                        top_products[[ 
+                            "Id Produk", "Nama_Produk", "Kategori",
+                            "Jumlah Terjual", "Total Pendapatan (Rp)", "Stok Tersisa"
+                        ]]
+                    )
+                else:
+                    st.info(f"Tidak ada produk untuk cluster {cluster}")
+
+        st.markdown("---")
+
+    # ============================================================
+    # 5️⃣ Ringkasan Machine Learning
+    # ============================================================
+
+        st.subheader("5️⃣ Ringkasan Machine Learning")
+
+        best_cluster = cluster_mean["Total Pendapatan (Rp)"].idxmax()
+
+        st.info(f"""
+            💡 **Cluster terbaik adalah Cluster {best_cluster}**,  
+            karena memiliki pendapatan rata-rata tertinggi.
+
+            Model K-Means memisahkan produk berdasarkan:
+            - Performa penjualan  
+            - Tingkat pendapatan  
+            - Tingkat stok  
+
+            Analisis ini membantu identifikasi:
+            - Cluster fast-moving  
+            - Cluster slow-moving  
+            - Cluster risiko overstock / deadstock  
+            """)
+        # st.header("📈 Analisis Tiap Cluster")
+        # if "df_clustered" not in st.session_state:
+        #     st.warning("Belum ada hasil clustering.")
+        #     st.stop()
+        # df_clustered = st.session_state["df_clustered"]
+        # numeric_cols = st.session_state["numeric_cols"]
+        # df_with_stats, cluster_mean, cluster_size = compute_cluster_stats(df_clustered, numeric_cols)
+        # st.subheader("📊 Data Produk dengan Statistik")
+        # show_df_with_rupiah(df_with_stats)
+        # st.subheader("📋 Rata-Rata Numerik per Cluster")
+        # cluster_mean_fmt = cluster_mean.copy()
+        # for col in MONEY_COLS:
+        #     if col in cluster_mean_fmt.columns:
+        #         cluster_mean_fmt[col] = cluster_mean_fmt[col].apply(format_rupiah)
+        # st.table(cluster_mean_fmt)
+        # st.subheader("📦 Jumlah Produk per Cluster")
+        # cluster_size = cluster_size.rename(columns={"Cluster": "Cluster", "Jumlah Produk": "Total Produk"})
+        # st.dataframe(cluster_size)
+        # st.markdown("### 🧠 Insight per Cluster")
+        # for cluster in sorted(df_clustered["Cluster"].unique()):
+        #     subset = df_clustered[df_clustered["Cluster"] == cluster]
+        #     pendapatan_mean = subset["Total Pendapatan (Rp)"].mean()
+        #     jumlah_terjual_mean = subset["Jumlah Terjual"].mean()
+        #     stok_mean = subset["Stok Tersisa"].mean()
+        #     st.markdown(f"#### 📦 Cluster {cluster}")
+        #     show_df_with_rupiah(subset)
+        #     st.markdown(f"""
+        #     **Ringkasan:**
+        #     - Rata-rata pendapatan produk: **{format_rupiah(pendapatan_mean)}**
+        #     - Rata-rata jumlah terjual: **{jumlah_terjual_mean:.2f} unit**
+        #     - Rata-rata stok tersisa: **{stok_mean:.2f} unit**
+        #     """)
 
     # ================================
     # TAB 4 — LAPORAN
